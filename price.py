@@ -3,7 +3,7 @@ import numpy as np
 import random as random
 
 xy = np.loadtxt('price_training.csv', delimiter = ',', dtype = np.float32)
-xz = np.loadtxt('price_test.csv', delimiter = ',', dtype = np.float32)
+xz = np.loadtxt('price_test_2.csv', delimiter = ',', dtype = np.float32)
 x_training_set = xy[:,0:-1] #row
 y_training_set = xy[:,[-1]]
 
