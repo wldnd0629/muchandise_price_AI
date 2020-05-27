@@ -3,10 +3,13 @@ import numpy as np
 import random as random
 
 xy = np.loadtxt('price_training.csv', delimiter = ',', dtype = np.float32)
-xz = np.loadtxt('price_test_2.csv', delimiter = ',', dtype = np.float32)
+xz = np.loadtxt('price_test.csv', delimiter = ',', dtype = np.float32)
+xw = np.loadtxt('price_val.csv', delimiter = ',', dtype = np.float32)
 x_training_set = xy[:,0:-1] #row
 y_training_set = xy[:,[-1]]
 
+x_validation_set = xw[:,0:-1] #row
+y_validation_set = xw[:,[-1]]
 
 x_test_set = xz[0:100,0:-1]
 y_test_set = xz[0:100,[-1]]
@@ -78,6 +81,10 @@ correct_prediction = tf.equal(prediction, tf.argmax(Y_one_hot, 1)) #위에서 �
 
 accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32)) #위의것을 활용해서 cast해서 그걸 accuarcy 정확도 라고 한
 
+saver = tf.train.Saver()
+
+min_loss = 100
+
 with tf.Session() as sess:
     sess.run(tf.global_variables_initializer())
 
@@ -89,12 +96,27 @@ with tf.Session() as sess:
             loss_train,acc_train = sess.run([cost, accuracy], feed_dict = {
                 X: x_training_set,Y: y_training_set})
             print("Step: {:5}\ttrain_Loss: {:.3f}\t train_Acc: {:.2%}\n".format(step,loss_train, acc_train))
-    
+            loss_val, acc_val = sess.run([cost, accuracy], feed_dict = {X:x_validation_set,Y:y_validation_set})
+            print("\t \t val_loss : {:.3f}\t val_acc: {:.2%}".format(loss_val, acc_val))
+            if min_loss > loss_val:
+                min_loss = loss_val
+                save_path = saver.save(sess, r"C:\Users\wldnd\Desktop\CAPSTONE\project\muchandise_price_AI\model.ckpt")
+                print("save complite: %s"%save_path)
+            
+    saver.restore(sess, r"C:\Users\wldnd\Desktop\CAPSTONE\project\muchandise_price_AI\model.ckpt")#q불러오고 밑에 코드에서 확인
+    check_val_cost, check_val_acc = sess.run([cost,accuracy], feed_dict = {X:x_validation_set,Y:y_validation_set})
+    print("\t \t ch_val_Loss: {:.3f}\t ch_val_Acc: {:.2%}".format(check_val_cost,check_val_acc))
     pred = sess.run(prediction, feed_dict={X: x_test_set})
+    
 
     for p,y in zip(pred, y_test_set.flatten()):
         #zip은 리스트를 짝지어줌
-        print("[{}] Prediction: {} True Y: {}".format(p == int(y), p, int(y)))
+        #print("[{}] Prediction: {} True Y: {}".format(p == int(y), p, int(y)))
+        print("[{}]".format(p == int(y)))
+        if (p == 1):
+            print("[산다] Prediction: {} True Y: {}".format(p, int(y)))
+        else:
+            print("[안산다] Prediction: {} True Y: {}".format(p, int(y)))
         #예측값과 그라운드 트루의 일치여부
     #for step in range(1):
       #  loss_test,acc_test = sess.run([cost_test, accuracy_test], feed_dict = {
