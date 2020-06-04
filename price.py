@@ -3,7 +3,7 @@ import numpy as np
 import random as random
 
 xy = np.loadtxt('price_training.csv', delimiter = ',', dtype = np.float32)
-xz = np.loadtxt('price_test.csv', delimiter = ',', dtype = np.float32)
+xz = np.loadtxt('price_test1.csv', delimiter = ',', dtype = np.float32)
 xw = np.loadtxt('price_val.csv', delimiter = ',', dtype = np.float32)
 x_training_set = xy[:,0:-1] #row
 y_training_set = xy[:,[-1]]
@@ -11,8 +11,8 @@ y_training_set = xy[:,[-1]]
 x_validation_set = xw[:,0:-1] #row
 y_validation_set = xw[:,[-1]]
 
-x_test_set = xz[0:100,0:-1]
-y_test_set = xz[0:100,[-1]]
+x_test_set = xz[:,0:-1]
+y_test_set = xz[:,[-1]]
 
 nb_classes = 2
 
@@ -107,7 +107,11 @@ with tf.Session() as sess:
     check_val_cost, check_val_acc = sess.run([cost,accuracy], feed_dict = {X:x_validation_set,Y:y_validation_set})
     print("\t \t ch_val_Loss: {:.3f}\t ch_val_Acc: {:.2%}".format(check_val_cost,check_val_acc))
     pred = sess.run(prediction, feed_dict={X: x_test_set})
-    
+
+    for step in range(1):
+        loss_test,acc_test = sess.run([cost, accuracy], feed_dict = {
+                X: x_test_set, Y: y_test_set}) 
+        print("test_set:  test_Loss: {:.3f}\t test_Acc: {:.2%}".format(loss_test, acc_test))
 
     for p,y in zip(pred, y_test_set.flatten()):
         #zip은 리스트를 짝지어줌

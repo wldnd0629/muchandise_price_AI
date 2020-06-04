@@ -1,9 +1,10 @@
 import tensorflow as tf
 import numpy as np
 import random as random
+import matplotlib.pyplot as plt
 
 xy = np.loadtxt('price_training.csv', delimiter = ',', dtype = np.float32)
-xz = np.loadtxt('price_test.csv', delimiter = ',', dtype = np.float32)
+xz = np.loadtxt('price_test1.csv', delimiter = ',', dtype = np.float32)
 xw = np.loadtxt('price_val.csv', delimiter = ',', dtype = np.float32)
 x_training_set = xy[:,0:-1] #row
 y_training_set = xy[:,[-1]]
@@ -65,11 +66,9 @@ cost = tf.reduce_mean(tf.square(hypothesis - Y))
 optimizer = tf.train.GradientDescentOptimizer(learning_rate=0.1).minimize(cost)
 
 
-prediction = tf.argmax(hypothesis, 1) #우리가 만든 모델에서 가장 높은 값을 넣는다
+predicted = tf.round(hypothesis) #int로 변환
 
-correct_prediction = tf.equal(prediction, tf.argmax(Y, 1)) #위에서 나온 값이랑 해당 셈플의 y값이랑 분류가 일치하나?
-
-accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32)) #위의것을 활용해서 cast해서 그걸 accuarcy 정확도 라고 한
+accuracy = tf.reduce_mean(tf.cast(tf.equal(predicted, Y), dtype=tf.float32)) #위의것을 활용해서 cast해서 그걸 accuarcy 정확도 라고 한
 
 saver = tf.train.Saver()
 
@@ -101,23 +100,25 @@ with tf.Session() as sess:
 
     for step in range(1):
         loss_test,acc_test = sess.run([cost, accuracy], feed_dict = {
-                X: x_test_set, Y: y_test_set}) #그래서 여기서 validation으로 실험
+                X: x_test_set, Y: y_test_set}) 
         print("test_set:  test_Loss: {:.3f}\t test_Acc: {:.2%}".format(loss_test, acc_test))
         
-    pred = sess.run(prediction, feed_dict={X: x_test_set})
+    pred = sess.run(tf.argmax(hypothesis), feed_dict={X: x_test_set})
 
     for p,y in zip(pred, y_test_set.flatten()):
         #zip은 리스트를 짝지어줌
-        if (p == int(y)):
-            print("[맞습니다] Prediction: {} True Y: {}".format(p, int(y)))
+        #print("[{}] Prediction: {} True Y: {}".format(p == int(y), p, int(y)))
+        print("[{}]".format(p == int(y)))
+        if (p == 1):
+            print("[산다] Prediction: {} True Y: {}".format(p, int(y)))
         else:
-            print("[틀립니다] Prediction: {} True Y: {}".format(p, int(y)))
+            print("[안산다] Prediction: {} True Y: {}".format(p, int(y)))
         #예측값과 그라운드 트루의 일치여부
    
     #for step in range(y_test_set.size):
         
-      #  r = random.randint(0, y_test_set.size-1)
-      #  print("Label: ", sess.run(tf.argmax(y_test_set[r:r + 1], 1)))
-      #  print("Prediction: ", sess.run(
-      #      tf.argmax(hypothesis, 1), feed_dict={X: x_test_set[r:r + 1]}))
+     #   r = random.randint(0, y_test_set.size-1)
+     #   print("Label: ", sess.run(tf.argmax(y_test_set[r:r + 1], 1)))
+     #   print("Prediction: ", sess.run(
+      #      predicted , feed_dict={X: x_test_set[r:r + 1]}))
 
