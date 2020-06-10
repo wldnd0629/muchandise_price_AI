@@ -2,21 +2,23 @@ import tensorflow as tf
 import numpy as np
 import random as random
 
-xy = np.loadtxt('price_training.csv', delimiter = ',', dtype = np.float32)
+tf.set_random_seed(777)
+
+xy = np.loadtxt('price_training1.csv', delimiter = ',', dtype = np.float32)
 xz = np.loadtxt('price_test1.csv', delimiter = ',', dtype = np.float32)
 xw = np.loadtxt('price_val.csv', delimiter = ',', dtype = np.float32)
-x_training_set = xy[:,0:-1] #row
+x_training_set = xy[:,1:-1] #row
 y_training_set = xy[:,[-1]]
 
-x_validation_set = xw[:,0:-1] #row
+x_validation_set = xw[:,1:-1] #row
 y_validation_set = xw[:,[-1]]
 
-x_test_set = xz[:,0:-1]
-y_test_set = xz[:,[-1]]
+x_test_set = xz[:50,1:-1]
+y_test_set = xz[:50,[-1]]
 
 nb_classes = 2
 
-X = tf.placeholder(tf.float32, [None, 4])
+X = tf.placeholder(tf.float32, [None, 3])
 Y = tf.placeholder(tf.int32, [None, 1])
 
 Y_one_hot = tf.one_hot(Y, nb_classes) #y의 가짓수를 nb_classes에 있는 숫자로 분류하는것 즉 7가지로 분류 [0,0,0,0,1,0,0]이런식
@@ -24,14 +26,14 @@ Y_one_hot = tf.one_hot(Y, nb_classes) #y의 가짓수를 nb_classes에 있는 �
 Y_one_hot = tf.reshape(Y_one_hot, [-1, nb_classes])
 
 
-W1 = tf.Variable(tf.random_normal([4, 4]), name='weight')
+W1 = tf.Variable(tf.random_normal([3, 3]), name='weight')
 
-b1 = tf.Variable(tf.random_normal([1]), name='bias')
+b1 = tf.Variable(tf.random_normal([3]), name='bias')
 
 X1 = tf.matmul(X, W1)+b1
 
 
-W2 = tf.Variable(tf.random_normal([4,nb_classes]), name='weight')
+W2 = tf.Variable(tf.random_normal([3,nb_classes]), name='weight')
 
 b2 = tf.Variable(tf.random_normal([nb_classes]), name='bias')
 
